@@ -117,7 +117,7 @@ class Helpers{
         int linhasFicheiro = NumeroLinhasFicheiro(filePath) + 1;
 
         // using(StreamWriter streamWriter = File.AppendText(filePath)){
-        using(StreamWriter streamWriter = new StreamWriter(filePath, true, Encoding.Unicode)){
+        using(StreamWriter streamWriter = File.AppendText(filePath)){
             streamWriter.WriteLine("M_" + linhasFicheiro.ToString() + " "
                                     + tipoMobilidade + " "
                                     + custoMobilidade.ToString() + " "
@@ -134,10 +134,20 @@ class Helpers{
 
         Console.Write("Tipo de mobilidade: ");
         tipoMobilidade = Console.ReadLine();
-        Console.Write("Custo desta mobilidade: ");
-        custoMobilidade = float.Parse(Console.ReadLine());
-        Console.Write("Autonomia desta mobilidade: ");
-        autonomiaMobilidade = int.Parse(Console.ReadLine());
+
+        while(true){
+            Console.Write("Custo desta mobilidade: ");
+            custoMobilidade = float.Parse(Console.ReadLine());
+            if (custoMobilidade > 0) break;
+            Console.WriteLine("Insira um custo de mobilidade válido!");
+        }
+        
+        while(true){
+            Console.Write("Autonomia desta mobilidade: ");
+            autonomiaMobilidade = int.Parse(Console.ReadLine());
+            if (autonomiaMobilidade > 0) break;
+            Console.WriteLine("Insira uma autonomia de mobilidade válida!");
+        }
 
         InserirNoFicheiroMobilidade(Constants.FileDirectoryMU, 
                                     tipoMobilidade, custoMobilidade,
@@ -147,29 +157,36 @@ class Helpers{
         Console.ReadLine();
     }
 
-    private static void RemoverNoFicheiroMobilidade(string filePath, string mobilidade){
-        string tempFile = Path.GetTempFileName(), linha = "";
-        StreamReader streamReader = new StreamReader(filePath);
-        using (StreamWriter streamWriter = new StreamWriter(tempFile)){
-            if((linha = streamReader.ReadLine()) != null){
-                if(!linha.Contains(mobilidade)){
-                    streamWriter.WriteLine(linha);
+    private static void RemoverNoFicheiroMobilidade(string filePath, int codigo){
+        string linha = "";
+        string[] linhas = File.ReadAllLines(filePath);
+        File.Delete(filePath);
+        using (StreamWriter streamWriter = File.AppendText(filePath)){
+            if(linha != null){
+                foreach(string linhaString in linhas){
+                    if(linhaString.Contains("M_" + codigo)){
+                        continue;
+                    } else streamWriter.WriteLine(linhaString);
                 }
-            } else Console.WriteLine("Não existe nenhuma mobilidade com esse código ou tipo!");
+            }
             streamWriter.Close();
         }
-        streamReader.Close();
 
-        File.Delete(filePath);
-        File.Move(tempFile, filePath);
+        Console.WriteLine("Mobilidade removida com sucesso.");
+        Console.ReadLine();
     }
     
     private static void RemoverMobilidade(){
-        string mobilidade = "";
-        Console.Write("Qual das mobilidades deseja apagar? ");
-        mobilidade = Console.ReadLine();
+        int codigo;
 
-        RemoverNoFicheiroMobilidade(Constants.FileDirectoryMU, mobilidade);
+        while(true){
+            Console.Write("Qual dos códigos mobilidades deseja apagar? M_");
+            codigo = int.Parse(Console.ReadLine());
+            if(codigo > 0) break;
+            Console.WriteLine("Insira um número válido!");
+        }
+
+        RemoverNoFicheiroMobilidade(Constants.FileDirectoryMU, codigo);
     }
 
     public static void drawMainMenu(){
