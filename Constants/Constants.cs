@@ -1,4 +1,4 @@
 class Constants{
-    public const string FileDirectoryMDM = "./Ficheiros/meiosDeMobilidade.txt";
-    public const string FileDirectoryMU = "./Ficheiros/mobilidadeUrbana.txt";
+    public const string FileDirectoryPedidos = "./Ficheiros/Pedidos.txt";
+    public const string FileDirectoryMobilidade = "./Ficheiros/Mobilidade.txt";
 }
