@@ -62,6 +62,45 @@ class MobilidadeUrbanaHelpers{
         return confirmacao;
     }
 
+    public static void AconselharOutraMobilidade(string codigo){
+        MobilidadeUrbana[] mobilidadeUrbana = ReadFileMobilidade();
+        
+        foreach(MobilidadeUrbana mobilidadeSelecionada in mobilidadeUrbana){
+            if(mobilidadeSelecionada != null){
+                if(mobilidadeSelecionada.codigo != codigo){
+                    if("M_" + Helpers.NumeroLinhasFicheiro(Constants.FileDirectoryMobilidade) != mobilidadeSelecionada.codigo)
+                        Console.Write(mobilidadeSelecionada.tipo + " ou ");
+                    else Console.Write(mobilidadeSelecionada.tipo);
+                }
+            }
+        }
+    }
+
+    public static bool VerificarSeEstaDisponivelAMobilidade(int codigo, int tempo, int distancia){
+        bool confirmacao = false;
+        MobilidadeUrbana[] mobilidadeUrbana = ReadFileMobilidade();
+        float conta = 0f;
+        string codigoMobilidade = "M_" + codigo;
+        
+        try{
+            foreach(MobilidadeUrbana mobilidadeSelecionada in mobilidadeUrbana){
+                if(mobilidadeSelecionada != null){
+                    conta = mobilidadeSelecionada.custo * tempo;
+                    if(VerificarSeTemCodigoMobilidade(codigo, Constants.FileDirectoryMobilidade)){
+                        if((mobilidadeSelecionada.autonomia > distancia)
+                            && (mobilidadeSelecionada.autonomia > conta)){
+                                            confirmacao = true;
+                            }
+                    }
+                }
+            }
+        } catch(Exception ex){
+            Console.WriteLine(ex.Message);
+        }
+
+        return confirmacao;
+    }
+
     public static bool VerificarSeTemCodigoMobilidade(int codigo, string filePath){
         string fileString;
         string[] stringToWords;
@@ -119,12 +158,12 @@ class MobilidadeUrbanaHelpers{
                                     autonomiaMobilidade);
 
         Console.WriteLine("Mobilidade inserida com sucesso!");
-        Console.ReadLine();
+        Helpers.PremirQualquerTeclaParaContinuar();
     }
 
     public static void DrawTableOfMobilidade(MobilidadeUrbana[] tiposMobilidade){
         Console.WriteLine("_________________________________________________________________");
-        Console.Write("|Código\t|Tipo\t\t\t|Custo\t\t|Autonomia\t|\n");
+        Console.WriteLine("|Código\t|Tipo\t\t\t|Custo\t\t|Autonomia\t|");
         foreach(MobilidadeUrbana mobilidade in tiposMobilidade){
             if(mobilidade != null) {
                 if(mobilidade.tipo.Length < 7) Console.WriteLine("|" + mobilidade.codigo + "\t|" + mobilidade.tipo + "\t\t\t|" 
@@ -134,6 +173,7 @@ class MobilidadeUrbanaHelpers{
             }
         }
         Console.WriteLine("|_______________________________________________________________|");
+        Helpers.PremirQualquerTeclaParaContinuar();
     }
     
     public static void RemoverMobilidade(){

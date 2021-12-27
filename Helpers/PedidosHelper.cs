@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 
 class PedidosHelper{
-    //Pergunta um
     private static Pedidos[] ReadFilePedidos(){
         Pedidos[] todosPedidos = new Pedidos[20];
         string fileString;
@@ -87,7 +86,51 @@ class PedidosHelper{
     }
 
     private static int EfetuarCalculo(string filePath, int codigo){
-        return 1;
+        Pedidos[] todosPedidos = ReadFilePedidos();
+        return (todosPedidos[codigo].tempo * 100)/todosPedidos[codigo].distancia;
+    }
+
+    private static void DrawTableOfPedidos(Pedidos[] todosPedidos){
+        Console.WriteLine("_________________________________________________________________________");
+        Console.Write("|Número Ordem\t|NIF\t\t|Código\t|Tempo(min)\t|Distância(km)\t|\n");
+        foreach(Pedidos pedidos in todosPedidos){
+            if(pedidos != null) Console.WriteLine("|" + pedidos.nOrdem + "\t\t|" + pedidos.nif + "\t|"
+                                                    +pedidos.codigo + "\t|" + pedidos.tempo + "\t\t|"
+                                                    +pedidos.distancia + "\t\t|");
+        }
+        Console.WriteLine("|_______________________________________________________________________|");
+        Helpers.PremirQualquerTeclaParaContinuar();
+    }
+
+    private static void ListarPedidoPretendida(int codigo){
+        Pedidos[] todosPedidos = ReadFilePedidos();
+        Console.WriteLine("\n\n_________________________________________________________________________");
+        Console.Write("|Número Ordem\t|NIF\t\t|Código\t|Tempo(min)\t|Distância(km)\t|\n");
+
+        foreach(Pedidos pedidos in todosPedidos){
+            if(pedidos != null){
+                if(pedidos.codigo == "M_" + codigo){
+                    Console.WriteLine("|" + pedidos.nOrdem + "\t\t|" + pedidos.nif + "\t|"
+                                                    +pedidos.codigo + "\t|" + pedidos.tempo + "\t\t|"
+                                                    +pedidos.distancia + "\t\t|");
+                }
+            }
+        }
+        Console.WriteLine("|_______________________________________________________________________|");
+        Helpers.PremirQualquerTeclaParaContinuar();
+    }
+
+    public static void UtilizacaoDaPedidoSelecionada(){
+        int codigo;
+        while(true){
+            Console.Write("Qual é o código da mobilidade que deseja ver? M_");
+            codigo = int.Parse(Console.ReadLine());
+
+            if(codigo > 0 && MobilidadeUrbanaHelpers.VerificarSeTemCodigoMobilidade(codigo, Constants.FileDirectoryMobilidade)) break;
+            Console.WriteLine("Inseriu o código errado.");
+        }
+
+        ListarPedidoPretendida(codigo);        
     }
 
     public static void CalculoAssociadoAoPedido(){
@@ -103,17 +146,7 @@ class PedidosHelper{
         }
 
         Console.WriteLine("O valor que irá gastar é: " + EfetuarCalculo(Constants.FileDirectoryPedidos, codigo));
-    }
-
-    public static void DrawTableOfPedidos(Pedidos[] todosPedidos){
-        Console.WriteLine("_________________________________________________________________________");
-        Console.Write("|Número Ordem\t|NIF\t\t|Código\t|Tempo(min)\t|Distância(km)\t|\n");
-        foreach(Pedidos pedidos in todosPedidos){
-            if(pedidos != null) Console.WriteLine("|" + pedidos.nOrdem + "\t\t|" + pedidos.nif + "\t|"
-                                                    +pedidos.codigo + "\t|" + pedidos.tempo + "\t\t|"
-                                                    +pedidos.distancia + "\t\t|");
-        }
-        Console.WriteLine("|_______________________________________________________________________|");
+        Helpers.PremirQualquerTeclaParaContinuar();
     }
 
     public static void ImprimirPedidos(){
@@ -131,7 +164,7 @@ class PedidosHelper{
         while(true){
             Console.Write("Insira o seu NIF: ");
             nif = int.Parse(Console.ReadLine());
-            if(nif > 0 && nif < 1000000000) break;
+            if(nif > 0 && nif < 1000000000 && UtilizadorHelpers.ConfirmacaoSeHaUtilizador(nif)) break;
             Console.WriteLine("Insira um NIF válido!");
         }
 
@@ -146,15 +179,19 @@ class PedidosHelper{
         while(true){
             Console.Write("Insira o tempo: ");
             tempo = int.Parse(Console.ReadLine());
-            if(tempo > 0) break;
-            Console.WriteLine("Insira um tempo válido!");
-        }
 
-        while(true){
             Console.Write("Insira a distancia: ");
             distancia = int.Parse(Console.ReadLine());
-            if(distancia > 0) break;
-            Console.WriteLine("Insira uma distancia válido!");
+
+            if(distancia > 0 && tempo > 0 && MobilidadeUrbanaHelpers.VerificarSeEstaDisponivelAMobilidade(codigo, tempo, distancia)) break;
+            
+            if(distancia < 0 || tempo < 0) Console.WriteLine("Por favor verifique um dos campos que nao foi corretamente preenchido");
+            else{
+                Console.Write("\nA mobilidade que deseja nao tem autonomia suficiente para este tempo e distancia."
+                                + "Talvez queira usar outra mobilidade, tal como: ");
+                MobilidadeUrbanaHelpers.AconselharOutraMobilidade("M_" + codigo);
+                Helpers.PremirQualquerTeclaParaContinuar();
+            }
         }
 
         InserirPedidoNoFicheiro(nif, codigo, tempo, distancia, Constants.FileDirectoryPedidos);
@@ -168,7 +205,7 @@ class PedidosHelper{
             codigo = int.Parse(Console.ReadLine());
             if(codigo > 0 && RemoverNoFicheiroUtilizacao(Constants.FileDirectoryPedidos, codigo)){
                 Console.WriteLine("Pedido removido com sucesso.");
-                Console.ReadLine();
+                Helpers.PremirQualquerTeclaParaContinuar();
                 break;
             } else Console.WriteLine("Inseriu o código errado.");
         }
