@@ -85,9 +85,19 @@ class PedidosHelper{
         return confirmacao;
     }
 
-    private static int EfetuarCalculo(string filePath, int codigo){
+    private static float EfetuarCalculo(string filePath, int codigo, int mobilidade){
+        float conta = 0;
+        string comparacao = "M_" + mobilidade;
         Pedidos[] todosPedidos = ReadFilePedidos();
-        return (todosPedidos[codigo].tempo * 100)/todosPedidos[codigo].distancia;
+        MobilidadeUrbana[] todasMobilidades = MobilidadeUrbanaHelpers.ReadFileMobilidade();
+        foreach(MobilidadeUrbana mobilidadeSelecionada in todasMobilidades){
+            if(mobilidadeSelecionada != null){
+                if(mobilidadeSelecionada.codigo == comparacao){
+                    conta = todosPedidos[codigo].tempo * mobilidadeSelecionada.custo;
+                } 
+            }
+        }
+        return conta;
     }
 
     private static void DrawTableOfPedidos(Pedidos[] todosPedidos){
@@ -130,22 +140,27 @@ class PedidosHelper{
             Console.WriteLine("Inseriu o código errado.");
         }
 
-        ListarPedidoPretendida(codigo);        
+        ListarPedidoPretendida(codigo);
     }
 
     public static void CalculoAssociadoAoPedido(){
-        int codigo, linhas = 0;
+        int codigoPedidos, linhasPedidos = 0, codigoMobilidade, linhasMobilidade = 0;
 
         while(true){
             Console.Write("Qual o código do pedido que deseja calcular? ");
-            codigo = int.Parse(Console.ReadLine());
-            linhas = Helpers.NumeroLinhasFicheiro(Constants.FileDirectoryPedidos);
+            codigoPedidos = int.Parse(Console.ReadLine());
+            linhasPedidos = Helpers.NumeroLinhasFicheiro(Constants.FileDirectoryPedidos);
 
-            if(codigo > 0 && codigo <= linhas) break;
+            Console.Write("Qual o código da mobilidade que deseja calcular? M_");
+            codigoMobilidade = int.Parse(Console.ReadLine());
+            linhasMobilidade = Helpers.NumeroLinhasFicheiro(Constants.FileDirectoryMobilidade);
+
+            if(codigoPedidos > 0 && codigoPedidos <= linhasPedidos 
+            && codigoMobilidade > 0 && codigoMobilidade <= linhasMobilidade) break;
             Console.WriteLine("Insira um número válido!");
         }
 
-        Console.WriteLine("O valor que irá gastar é: " + EfetuarCalculo(Constants.FileDirectoryPedidos, codigo));
+        Console.WriteLine("O valor que irá gastar é: " + EfetuarCalculo(Constants.FileDirectoryPedidos, codigoPedidos, codigoMobilidade));
         Helpers.PremirQualquerTeclaParaContinuar();
     }
 

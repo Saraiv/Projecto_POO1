@@ -4,3 +4,4 @@ M_3 Carro 0,80 320
 M_4 Bicicleta 0,30 19
 M_5 Autocarro 2 420
 M_6 MonsterCar 20 200
+M_7 Autocarroo 20 20

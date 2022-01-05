@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 
 class MobilidadeUrbanaHelpers{
-    private static MobilidadeUrbana[] ReadFileMobilidade(){
+    public static MobilidadeUrbana[] ReadFileMobilidade(){
         MobilidadeUrbana[] tiposMobilidade = new MobilidadeUrbana[20];
         string fileString;
         string[] stringToWords;
